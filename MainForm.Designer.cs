@@ -66,7 +66,7 @@ namespace BackupApp
             backup_items_listBox.Location = new Point(20, 41);
             backup_items_listBox.Margin = new Padding(3, 2, 3, 2);
             backup_items_listBox.Name = "backup_items_listBox";
-            backup_items_listBox.Size = new Size(341, 229);
+            backup_items_listBox.Size = new Size(341, 244);
             backup_items_listBox.TabIndex = 1;
             backup_items_listBox.DragDrop += Backup_items_listBox_DragDrop;
             backup_items_listBox.DragEnter += Backup_items_listBox_DragEnter;
@@ -101,7 +101,7 @@ namespace BackupApp
             // start_button
             // 
             start_button.Font = new Font("Segoe UI", 14F);
-            start_button.Location = new Point(470, 144);
+            start_button.Location = new Point(470, 152);
             start_button.Name = "start_button";
             start_button.Size = new Size(92, 32);
             start_button.TabIndex = 5;
@@ -112,7 +112,7 @@ namespace BackupApp
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(388, 189);
+            label3.Location = new Point(388, 194);
             label3.Name = "label3";
             label3.Size = new Size(77, 15);
             label3.TabIndex = 2;
@@ -120,10 +120,11 @@ namespace BackupApp
             // 
             // current_item_textBox
             // 
-            current_item_textBox.Location = new Point(386, 216);
+            current_item_textBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            current_item_textBox.Location = new Point(388, 219);
             current_item_textBox.Multiline = true;
             current_item_textBox.Name = "current_item_textBox";
-            current_item_textBox.Size = new Size(261, 54);
+            current_item_textBox.Size = new Size(261, 66);
             current_item_textBox.TabIndex = 3;
             // 
             // save_list_button
@@ -197,6 +198,7 @@ namespace BackupApp
             Controls.Add(label1);
             Margin = new Padding(3, 2, 3, 2);
             Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Backup Manager";
             list_contextMenuStrip.ResumeLayout(false);
             ResumeLayout(false);

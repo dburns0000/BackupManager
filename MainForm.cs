@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Windows.Forms;
 
 namespace BackupApp
 {
@@ -8,9 +9,65 @@ namespace BackupApp
         private readonly List<string> _folderAndFileList = [];
         private readonly List<string> _errorList = [];
 
+        private bool IsOnScreen()
+        {
+            Screen[] screens = Screen.AllScreens;
+            foreach (Screen screen in screens)
+            {
+                Point bottomRight = new(Location.X + Size.Width, Location.Y + Size.Height);
+                if (screen.WorkingArea.Contains(bottomRight))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+            if (Properties.Settings.Default.MainFormSize != new Size(0, 0))
+            {
+                Size = Properties.Settings.Default.MainFormSize;
+            }
+
+            if (Properties.Settings.Default.MainFormLocation != new Point(0, 0))
+            {
+                Location = Properties.Settings.Default.MainFormLocation;
+
+                if (!IsOnScreen())
+                {
+                    Location = new Point(100, 100);
+                }
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (WindowState == FormWindowState.Normal)
+            {
+                Properties.Settings.Default.MainFormSize = Size;
+                Properties.Settings.Default.MainFormLocation = Location;
+            }
+            else
+            {
+                Properties.Settings.Default.MainFormSize = RestoreBounds.Size;
+                Properties.Settings.Default.MainFormLocation = RestoreBounds.Location;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
         public MainForm()
         {
             InitializeComponent();
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.LastBackupFolder))
+            {
+                location_textBox.Text = Properties.Settings.Default.LastBackupFolder;
+            }
         }
 
         public void UpdateCurrentItem(string currentItem)
@@ -61,16 +118,20 @@ namespace BackupApp
 
         private void Location_select_button_Click(object sender, EventArgs e)
         {
+            string lastLocation = location_textBox.Text;
+
             // Display a dialog to select a folder
             FolderBrowserDialog folderBrowserDialog = new()
             {
                 Description = "Select a folder for backing up to",
-                ShowNewFolderButton = true
+                ShowNewFolderButton = true,
+                SelectedPath = lastLocation
             };
             folderBrowserDialog.ShowDialog();
             if (folderBrowserDialog.SelectedPath != "")
             {
                 location_textBox.Text = folderBrowserDialog.SelectedPath;
+                Properties.Settings.Default.LastBackupFolder = folderBrowserDialog.SelectedPath;
             }
         }
 
@@ -78,12 +139,12 @@ namespace BackupApp
         {
             if (string.IsNullOrEmpty(location_textBox.Text))
             {
-                MessageBox.Show("Please select a location to save the backup file.");
+                CustomMessageBox.Show("Please select a location to save the backup file.", "Backup Manager");
                 return;
             }
             if (backup_items_listBox.Items.Count == 0)
             {
-                MessageBox.Show("Please add folders and files to back up.");
+                CustomMessageBox.Show("Please add folders and files to back up.", "Backup Manager");
                 return;
             }
 
@@ -115,7 +176,7 @@ namespace BackupApp
                 {
                     errorBuilder.AppendLine(error);
                 }
-                MessageBox.Show($"Errors occurred during the backup:{Environment.NewLine}{errorBuilder}");
+                CustomMessageBox.Show($"Errors occurred during the backup:{Environment.NewLine}{errorBuilder}", "Backup Manager");
             }
         }
 
@@ -135,14 +196,18 @@ namespace BackupApp
             }
 
             string jsonString = JsonSerializer.Serialize(items);
+
+            string lastLocation = Properties.Settings.Default.LastListLocation ?? "";
             SaveFileDialog saveFileDialog = new()
             {
                 Filter = "JSON files (*.json)|*.json",
                 FilterIndex = 1,
-                RestoreDirectory = true
+                RestoreDirectory = true,
+                InitialDirectory = lastLocation
             };
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
+                Properties.Settings.Default.LastListLocation = Path.GetDirectoryName(saveFileDialog.FileName);
                 try
                 {
                     File.WriteAllText(saveFileDialog.FileName, jsonString);
@@ -156,14 +221,17 @@ namespace BackupApp
 
         private void Restore_list_button_Click(object sender, EventArgs e)
         {
+            string lastLocation = Properties.Settings.Default.LastListLocation ?? "";
             OpenFileDialog openFileDialog = new()
             {
                 Filter = "JSON files (*.json)|*.json",
                 FilterIndex = 1,
-                RestoreDirectory = true
+                RestoreDirectory = true,
+                InitialDirectory = lastLocation
             };
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
+                Properties.Settings.Default.LastListLocation = Path.GetDirectoryName(openFileDialog.FileName);
                 try
                 {
                     string jsonString = File.ReadAllText(openFileDialog.FileName);
