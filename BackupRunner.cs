@@ -36,11 +36,21 @@ namespace BackupApp
                 {
                     // Replace the drive letter with "Drive_N" in the backup path
                     string? driveLetter = Path.GetPathRoot(item);
-                    if (driveLetter == null)
+                    if (driveLetter == null || driveLetter.Length < 3)
                     {
                         continue;
                     }
-                    string driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}_";
+
+                    string driveName;
+                    if (driveLetter.StartsWith("\\\\"))
+                    {
+                        driveName = $"NetworkDrive_{driveLetter.TrimStart('\\')}";
+                    }
+                    else
+                    {
+                        driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
+                    }
+                    
                     string backupPathWithDriveName = string.Concat(backupPath, "\\", driveName, item.AsSpan(driveLetter.Length));
                     string? backupFolder = Path.GetDirectoryName(backupPathWithDriveName);
                     if (backupFolder == null)
@@ -57,11 +67,21 @@ namespace BackupApp
                 {
                     // Replace the drive letter with "Drive_N" in the backup path
                     string? driveLetter = Path.GetPathRoot(item);
-                    if (driveLetter == null)
+                    if (driveLetter == null || driveLetter.Length < 3)
                     {
                         continue;
                     }
-                    string driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}_";
+
+                    string driveName;
+                    if (driveLetter.StartsWith("\\\\"))
+                    {
+                        driveName = $"NetworkDrive_{driveLetter.TrimStart('\\')}";
+                    }
+                    else
+                    {
+                        driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
+                    }
+
                     string backupPathWithDriveName = string.Concat(backupPath, "\\", driveName, item.AsSpan(driveLetter.Length));
 
                     _mainForm.UpdateCurrentItem(item);
