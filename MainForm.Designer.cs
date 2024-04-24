@@ -30,6 +30,7 @@ namespace BackupApp
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             label1 = new Label();
             backup_items_listBox = new ListBox();
             label2 = new Label();
@@ -196,6 +197,7 @@ namespace BackupApp
             Controls.Add(label2);
             Controls.Add(backup_items_listBox);
             Controls.Add(label1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Margin = new Padding(3, 2, 3, 2);
             Name = "MainForm";
             StartPosition = FormStartPosition.CenterScreen;
