@@ -147,6 +147,18 @@ namespace BackupApp
                 CustomMessageBox.Show("Please add folders and files to back up.", "Backup Manager");
                 return;
             }
+            if (!Directory.Exists(location_textBox.Text))
+            {
+                try
+                {
+                    Directory.CreateDirectory(location_textBox.Text);
+                }
+                catch (Exception ex)
+                {
+                    CustomMessageBox.Show($"Error creating directory: {ex.Message}", "Backup Manager");
+                    return;
+                }
+            }
 
             List<string> items = [];
             foreach (var item in backup_items_listBox.Items)
