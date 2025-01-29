@@ -121,7 +121,7 @@ namespace BackupApp
             // 
             // current_item_textBox
             // 
-            current_item_textBox.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            current_item_textBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             current_item_textBox.Location = new Point(388, 219);
             current_item_textBox.Multiline = true;
             current_item_textBox.Name = "current_item_textBox";
