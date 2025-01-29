@@ -13,11 +13,6 @@ namespace BackupApp
 
         async public Task RunBackup(List<string> foldersAndFiles, string backupPath)
         {
-            if (!Directory.Exists(backupPath))
-            {
-                Directory.CreateDirectory(backupPath);
-            }
-
             await Task.Run(() => CopyFoldersAndFiles(foldersAndFiles, backupPath));
             _mainForm.UpdateCurrentItem("Backup completed!");
         }
@@ -41,16 +36,10 @@ namespace BackupApp
                         continue;
                     }
 
-                    string driveName;
-                    if (driveLetter.StartsWith("\\\\"))
-                    {
-                        driveName = $"NetworkDrive_{driveLetter.TrimStart('\\')}";
-                    }
-                    else
-                    {
-                        driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
-                    }
-                    
+                    string driveName = driveLetter.StartsWith("\\\\")
+                        ? $"NetworkDrive_{driveLetter.TrimStart('\\')}"
+                        : $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
+
                     string backupPathWithDriveName = string.Concat(backupPath, "\\", driveName, item.AsSpan(driveLetter.Length));
                     string? backupFolder = Path.GetDirectoryName(backupPathWithDriveName);
                     if (backupFolder == null)
@@ -72,15 +61,9 @@ namespace BackupApp
                         continue;
                     }
 
-                    string driveName;
-                    if (driveLetter.StartsWith("\\\\"))
-                    {
-                        driveName = $"NetworkDrive_{driveLetter.TrimStart('\\')}";
-                    }
-                    else
-                    {
-                        driveName = $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
-                    }
+                    string driveName = driveLetter.StartsWith("\\\\")
+                        ? $"NetworkDrive_{driveLetter.TrimStart('\\')}"
+                        : $"Drive_{driveLetter.TrimEnd('\\').TrimEnd(':')}\\";
 
                     string backupPathWithDriveName = string.Concat(backupPath, "\\", driveName, item.AsSpan(driveLetter.Length));
 
@@ -132,28 +115,40 @@ namespace BackupApp
             }
         }
 
+        // Thanks to Gemini AI for the code to make it non-recursive
         private void CopyFolder(string sourceFolder, string destinationFolder)
         {
-            // Create the destination folder if it does not exist
-            if (!Directory.Exists(destinationFolder))
+            void CopyFiles(string source, string dest)
             {
-                Directory.CreateDirectory(destinationFolder);
+                foreach (string file in Directory.GetFiles(source))
+                {
+                    string fileName = Path.GetFileName(file);
+                    string destFile = Path.Combine(dest, fileName);
+                    CopyFile(file, destFile); // Assuming CopyFile is defined elsewhere
+                }
             }
 
-            // Copy all files in the source folder to the destination folder
-            foreach (string file in Directory.GetFiles(sourceFolder))
-            {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(destinationFolder, fileName);
-                CopyFile(file, destFile);
-            }
+            Stack<(string, string)> foldersToCopy = new();
+            foldersToCopy.Push((sourceFolder, destinationFolder));
 
-            // Copy all subfolders in the source folder to the destination folder
-            foreach (string subfolder in Directory.GetDirectories(sourceFolder))
+            while (foldersToCopy.Count > 0)
             {
-                string folderName = Path.GetFileName(subfolder);
-                string destFolder = Path.Combine(destinationFolder, folderName);
-                CopyFolder(subfolder, destFolder);
+                (string currentSource, string currentDest) = foldersToCopy.Pop();
+
+                // Create the destination folder if it does not exist
+                if (!Directory.Exists(currentDest))
+                {
+                    Directory.CreateDirectory(currentDest);
+                }
+
+                CopyFiles(currentSource, currentDest);
+
+                foreach (string subfolder in Directory.GetDirectories(currentSource))
+                {
+                    string folderName = Path.GetFileName(subfolder);
+                    string destFolder = Path.Combine(currentDest, folderName);
+                    foldersToCopy.Push((subfolder, destFolder)); // Add subfolder to the stack
+                }
             }
         }
 
