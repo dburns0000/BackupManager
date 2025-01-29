@@ -11,6 +11,11 @@
     <ApplicationIcon>backup.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Content Include="backup.ico" />
   </ItemGroup>
